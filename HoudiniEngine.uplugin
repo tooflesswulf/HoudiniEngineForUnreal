@@ -2,11 +2,11 @@
 	"FileVersion" : 3,
 	"FriendlyName" : "Houdini Engine",
 	"Version" : 18000458,
-	"VersionName" : "18.0.458",
+	"VersionName" : "18.0.499",
 	"CreatedBy" : "Side Effects Software Inc.",
 	"CreatedByURL" : "http://www.sidefx.com",
 	"DocsURL" : "http://www.sidefx.com/docs/unreal/",
-	"Description" : "Houdini Engine for Unreal Engine.",
+	"Description" : "Houdini Engine for Unreal Engine. HI hi HI",
 	"Category" : "Rendering",
 	"EnabledByDefault" : true,
 

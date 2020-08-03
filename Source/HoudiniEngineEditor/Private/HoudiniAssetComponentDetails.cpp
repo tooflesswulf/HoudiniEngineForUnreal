@@ -35,6 +35,7 @@
 #include "HoudiniParameterDetails.h"
 #include "HoudiniAssetInput.h"
 #include "HoudiniAssetInstanceInput.h"
+#include "HoudiniAssetParameterToggle.h"
 
 #include "Components/InstancedStaticMeshComponent.h"
 #include "ContentBrowserModule.h"
@@ -114,6 +115,89 @@ FHoudiniAssetComponentDetails::CustomizeDetails( IDetailLayoutBuilder & DetailBu
                 UHoudiniAssetComponent * HoudiniAssetComponent = Cast< UHoudiniAssetComponent >( Object );
                 HoudiniAssetComponents.Add( HoudiniAssetComponent );
             }
+        }
+    }
+
+    {
+        IDetailCategoryBuilder& DetailCategoryBuilder =
+          DetailBuilder.EditCategory("CustomCateg", FText::GetEmpty(), ECategoryPriority::Important);
+        
+        
+        // HOUDINI_LOG_MESSAGE( TEXT("Hiya there! =) HoudiniAssetComponentDetails.cpp:149 here ;)"));
+        UHoudiniAssetParameter * MyParm = nullptr;
+        for ( TArray< UHoudiniAssetComponent * >::TIterator
+            IterComponents( HoudiniAssetComponents ); IterComponents; ++IterComponents )
+        {
+            UHoudiniAssetComponent * HoudiniAssetComponent = *IterComponents;
+            if ( !HoudiniAssetComponent || HoudiniAssetComponent->IsPendingKill() )
+                continue;
+
+            for ( TMap< HAPI_ParmId, UHoudiniAssetParameter * >::TIterator
+                IterParams( HoudiniAssetComponent->Parameters ); IterParams; ++IterParams )
+            {
+                UHoudiniAssetParameter * HoudiniAssetParameter = IterParams.Value();
+                if (!HoudiniAssetParameter || HoudiniAssetParameter->IsPendingKill())
+                    continue;
+
+                // ensure the parameter is properly owned by a HAC
+                const UHoudiniAssetComponent* Owner = HoudiniAssetParameter->GetHoudiniAssetComponent();
+                if (!Owner || Owner->IsPendingKill())
+                    continue;
+                
+                // HOUDINI_LOG_MESSAGE( TEXT("parm name: %s"), *HoudiniAssetParameter->GetParameterName() );
+                if (HoudiniAssetParameter->GetParameterName().Equals(TEXT("extrude"), ESearchCase::CaseSensitive))
+                {
+                    MyParm = HoudiniAssetParameter;
+                    break;
+                }
+            }
+        }
+        FText LabelText = FText::FromString(TEXT("Yay I work!!! =)"));
+        FSlateFontInfo LargeDetailsFont = IDetailLayoutBuilder::GetDetailFontBold();
+        LargeDetailsFont.Size += 2;
+        FSlateColor LabelColor = FLinearColor( 1.0f, 1.0f, 0.0f, 1.0f );
+        DetailCategoryBuilder.AddCustomRow(FText::GetEmpty())
+        [
+            SNew(STextBlock)
+            .Text(LabelText)
+            .ToolTipText(LabelText)
+            .Font(LargeDetailsFont)
+            .Justification(ETextJustify::Center)
+            .ColorAndOpacity(LabelColor)
+        ];
+
+        // FHoudiniParameterDetails::CreateWidget( DetailCategoryBuilder, MyParm );
+        if (auto ParamToggle = Cast<UHoudiniAssetParameterToggle>( MyParm )) {
+            // FHoudiniParameterDetails::CreateWidgetToggle( DetailCategoryBuilder, *ParamToggle );
+            FDetailWidgetRow & Row = DetailCategoryBuilder.AddCustomRow( FText::GetEmpty() );
+            FText ParameterLabelText = FText::FromString( ParamToggle->GetParameterLabel() );
+            FHoudiniParameterDetails::CreateNameWidget( ParamToggle, Row, false );
+
+            TSharedRef< SVerticalBox > VerticalBox = SNew( SVerticalBox );
+            TSharedPtr< SCheckBox > CheckBox;
+
+            VerticalBox->AddSlot().Padding( 2, 2, 5, 2 )
+            [
+                SAssignNew( CheckBox, SCheckBox )
+                .OnCheckStateChanged( FOnCheckStateChanged::CreateUObject(
+                    ParamToggle, &UHoudiniAssetParameterToggle::CheckStateChanged, 0 ) )
+                .IsChecked( TAttribute< ECheckBoxState >::Create(
+                    TAttribute< ECheckBoxState >::FGetter::CreateUObject(
+                        ParamToggle, &UHoudiniAssetParameterToggle::IsChecked, 0 ) ) )
+                .Content()
+                [
+                    SNew( STextBlock )
+                    .Text( ParameterLabelText )
+                    .ToolTipText( FHoudiniParameterDetails::GetParameterTooltip( ParamToggle ) )
+                    .Font( FEditorStyle::GetFontStyle( TEXT( "PropertyWindow.NormalFont" ) ) )
+                ]
+            ];
+
+            if ( CheckBox.IsValid() )
+                CheckBox->SetEnabled( !ParamToggle->bIsDisabled );
+
+            Row.ValueWidget.Widget = VerticalBox;
+            Row.ValueWidget.MinDesiredWidth( HAPI_UNREAL_DESIRED_ROW_VALUE_WIDGET_WIDTH );
         }
     }
 

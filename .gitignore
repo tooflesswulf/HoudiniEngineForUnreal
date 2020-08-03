@@ -13,3 +13,7 @@ Intermediate/
 Binaries/
 *.Template.cs
 *.uplugin.Template
+
+.vs/*
+.vscode/*
+
