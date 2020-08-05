@@ -1606,10 +1606,11 @@ UHoudiniAssetComponent::TickHoudiniComponent()
 {
     // Only tick/cook when in Editor
     // This prevents PIE cooks or runtime cooks due to inputs moving
-    if (!GetWorld() || (GetWorld()->WorldType != EWorldType::Editor))
-    {
-        return;
-    }
+    // if (!GetWorld() || (GetWorld()->WorldType != EWorldType::Editor))
+    // {
+    //     HOUDINI_LOG_MESSAGE(TEXT("Exited cook b/c editor."));
+    //     return;
+    // }
 
     // Get settings.
     const UHoudiniRuntimeSettings * HoudiniRuntimeSettings = GetDefault< UHoudiniRuntimeSettings >();

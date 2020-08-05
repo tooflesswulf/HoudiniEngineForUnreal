@@ -17,5 +17,20 @@ class HOUDINIENGINERUNTIME_API UHoudiniBlueprintLibrary : public UBlueprintFunct
 	GENERATED_BODY()
 	
 	UFUNCTION(BlueprintCallable, Category="Houdini Functions")
-	static void MyFirstFunction(AHoudiniAssetActor* HoudiniAssetActor);
+	static void HAssetToggleExtrude(AHoudiniAssetActor* HoudiniAssetActor);
+	
+	UFUNCTION(BlueprintCallable, Category="Houdini Functions")
+	static void HAssetAdvanceFrame(AHoudiniAssetActor* HoudiniAssetActor);
+	UFUNCTION(BlueprintCallable, Category="Houdini Functions")
+	static int HAssetGetFrame(AHoudiniAssetActor* HoudiniAssetActor);
+
+	UFUNCTION(BlueprintCallable, Category="Houdini Functions")
+	static void HAssetAdvanceTime(AHoudiniAssetActor* HoudiniAssetActor, float dt);
+	UFUNCTION(BlueprintCallable, Category="Houdini Functions")
+	static float HAssetGetTime(AHoudiniAssetActor* HoudiniAssetActor);
+
+	UFUNCTION(BlueprintCallable, Category="Houdini Functions")
+	static void HAssetChangePos(AHoudiniAssetActor* HoudiniAssetActor, float dx=0, float dy=0, float dz=0);
+	UFUNCTION(BlueprintCallable, Category="Houdini Functions")
+	static void HAssetSetPos(AHoudiniAssetActor* HoudiniAssetActor, float x, float y, float z);
 };
