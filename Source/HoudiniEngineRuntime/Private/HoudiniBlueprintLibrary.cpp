@@ -3,75 +3,60 @@
 
 #include "HoudiniBlueprintLibrary.h"
 
-void UHoudiniBlueprintLibrary::HAssetToggleExtrude(AHoudiniAssetActor* HoudiniAssetActor)
+UHoudiniAssetParameter* GetHParm(AHoudiniAssetActor* HoudiniAssetActor, const FString& ParmName)
 {
-    HOUDINI_LOG_MESSAGE(TEXT("HAssetToggleExtrude Enter"));
     if (!FHoudiniEngineUtils::IsInitialized())
     {
         HOUDINI_LOG_MESSAGE(TEXT("Engine is not initializesd."));
-        return;
+        return nullptr;
     }
 
-    UHoudiniAssetComponent* HoudiniAssetComponent = HoudiniAssetActor->GetHoudiniAssetComponent();
-    auto parm = HoudiniAssetComponent->FindParameter("extrude");
-    if (parm == nullptr) return;
+    UHoudiniAssetComponent* HAC = HoudiniAssetActor->GetHoudiniAssetComponent();
+    if (!HAC) return nullptr;
 
-    // HOUDINI_LOG_MESSAGE(TEXT("Found the extrude parm: %s"), *parm->GetParameterName());
+    return HAC->FindParameter(ParmName);
+}
+
+void UHoudiniBlueprintLibrary::HAssetToggleExtrude(AHoudiniAssetActor* HoudiniAssetActor)
+{
+    HOUDINI_LOG_MESSAGE(TEXT("HAssetToggleExtrude Enter"));
+    auto parm = GetHParm(HoudiniAssetActor, "extrude");
+    if (parm == nullptr) return;
 
     if (auto ParamToggle = Cast<UHoudiniAssetParameterToggle>( parm )) {
         ECheckBoxState st = ParamToggle->IsChecked(0);
 
         if (st == ECheckBoxState::Checked) {
             st = ECheckBoxState::Unchecked;
-            HOUDINI_LOG_MESSAGE(TEXT("Unchecking :("));
         } else {
             st = ECheckBoxState::Checked;
-            HOUDINI_LOG_MESSAGE(TEXT("Checking :)"));
         }
         ParamToggle->CheckStateChanged(st, 0);
-
-        HoudiniAssetComponent->StartTaskAssetCookingManual();
     }
 }
 
 void UHoudiniBlueprintLibrary::HAssetAdvanceFrame(AHoudiniAssetActor* HoudiniAssetActor)
 {
     HOUDINI_LOG_MESSAGE(TEXT("HAssetAdvanceFrame Enter"));
-    if (!FHoudiniEngineUtils::IsInitialized())
-    {
-        HOUDINI_LOG_MESSAGE(TEXT("Engine is not initializesd."));
-        return;
-    }
-
-    UHoudiniAssetComponent* HoudiniAssetComponent = HoudiniAssetActor->GetHoudiniAssetComponent();
-    auto parm = HoudiniAssetComponent->FindParameter("frame");
+    auto parm = GetHParm(HoudiniAssetActor, "frame");
     if (parm == nullptr) return;
 
     if (auto ParamInt = Cast<UHoudiniAssetParameterInt>( parm )) {
-        int frame = ParamInt->GetValue(0).GetValue();
-        HOUDINI_LOG_MESSAGE(TEXT("Frame number %d."), frame);
+        int frame = ParamInt->GetParameterValue(0, -1);
+        HOUDINI_LOG_MESSAGE(TEXT("Sim frame number %d."), frame);
 
-        ParamInt->SetValue(frame + 1, 0, false);
-        HoudiniAssetComponent->NotifyParameterChanged( ParamInt );
-        HoudiniAssetComponent->StartTaskAssetCookingManual();
+        ParamInt->SetValue(frame + 1, 0, true);
     }
 }
 
 int UHoudiniBlueprintLibrary::HAssetGetFrame(AHoudiniAssetActor* HoudiniAssetActor)
 {
-    if (!FHoudiniEngineUtils::IsInitialized())
-    {
-        HOUDINI_LOG_MESSAGE(TEXT("Engine is not initializesd."));
-        return -1;
-    }
-
-    UHoudiniAssetComponent* HoudiniAssetComponent = HoudiniAssetActor->GetHoudiniAssetComponent();
-    auto parm = HoudiniAssetComponent->FindParameter("frame");
+    auto parm = GetHParm(HoudiniAssetActor, "frame");
     if (parm == nullptr) return -1;
+
     if (auto ParamInt = Cast<UHoudiniAssetParameterInt>( parm )) {
-        int ret = ParamInt->GetValue(0).GetValue();
-        HOUDINI_LOG_MESSAGE(TEXT("Frame number %d."), ret);
-        return ret;
+        int frame = ParamInt->GetParameterValue(0, -1);
+        return frame;
     }
     return -1;
 }
@@ -79,37 +64,22 @@ int UHoudiniBlueprintLibrary::HAssetGetFrame(AHoudiniAssetActor* HoudiniAssetAct
 void UHoudiniBlueprintLibrary::HAssetAdvanceTime(AHoudiniAssetActor* HoudiniAssetActor, float dt)
 {
     HOUDINI_LOG_MESSAGE(TEXT("HAssetAdvanceTime Enter"));
-    if (!FHoudiniEngineUtils::IsInitialized())
-    {
-        HOUDINI_LOG_MESSAGE(TEXT("Engine is not initializesd."));
-        return;
-    }
-
-    UHoudiniAssetComponent* HoudiniAssetComponent = HoudiniAssetActor->GetHoudiniAssetComponent();
-    auto parm = HoudiniAssetComponent->FindParameter("simtime");
+    auto parm = GetHParm(HoudiniAssetActor, "simtime");
     if (parm == nullptr) return;
 
     if (auto ParamFloat = Cast<UHoudiniAssetParameterFloat>( parm )) {
-        float frame = ParamFloat->GetParameterValue(0, -1);
-        HOUDINI_LOG_MESSAGE(TEXT("Sim time %f."), frame);
+        float time = ParamFloat->GetParameterValue(0, -1);
+        HOUDINI_LOG_MESSAGE(TEXT("Sim time %f."), time);
 
-        ParamFloat->SetValue(frame + dt, 0, false);
-        HoudiniAssetComponent->NotifyParameterChanged( ParamFloat );
-        HoudiniAssetComponent->StartTaskAssetCookingManual();
+        ParamFloat->SetValue(time + dt, 0, true);
     }
 }
 
 float UHoudiniBlueprintLibrary::HAssetGetTime(AHoudiniAssetActor* HoudiniAssetActor)
 {
-    if (!FHoudiniEngineUtils::IsInitialized())
-    {
-        HOUDINI_LOG_MESSAGE(TEXT("Engine is not initializesd."));
-        return -1;
-    }
-
-    UHoudiniAssetComponent* HoudiniAssetComponent = HoudiniAssetActor->GetHoudiniAssetComponent();
-    auto parm = HoudiniAssetComponent->FindParameter("frame");
+    auto parm = GetHParm(HoudiniAssetActor, "simtime");
     if (parm == nullptr) return -1;
+
     if (auto ParamFloat = Cast<UHoudiniAssetParameterFloat>( parm )) {
         float time = ParamFloat->GetParameterValue(0, -1);
         return time;
@@ -120,14 +90,7 @@ float UHoudiniBlueprintLibrary::HAssetGetTime(AHoudiniAssetActor* HoudiniAssetAc
 void UHoudiniBlueprintLibrary::HAssetChangePos(AHoudiniAssetActor* HoudiniAssetActor, float dx, float dy, float dz)
 {
     HOUDINI_LOG_MESSAGE(TEXT("HAssetChangePos Enter"));
-    if (!FHoudiniEngineUtils::IsInitialized())
-    {
-        HOUDINI_LOG_MESSAGE(TEXT("Engine is not initializesd."));
-        return;
-    }
-
-    UHoudiniAssetComponent* HoudiniAssetComponent = HoudiniAssetActor->GetHoudiniAssetComponent();
-    auto parm = HoudiniAssetComponent->FindParameter("extr_pos");
+    auto parm = GetHParm(HoudiniAssetActor, "extr_pos");
     if (parm == nullptr) return;
 
     if (auto ParamFloat = Cast<UHoudiniAssetParameterFloat>( parm )) {
@@ -138,32 +101,36 @@ void UHoudiniBlueprintLibrary::HAssetChangePos(AHoudiniAssetActor* HoudiniAssetA
 
         ParamFloat->SetValue(x + dx, 0, false);
         ParamFloat->SetValue(y + dy, 2, false);
-        ParamFloat->SetValue(z + dz, 1, false);
-        HoudiniAssetComponent->NotifyParameterChanged( ParamFloat );
-        HoudiniAssetComponent->StartTaskAssetCookingManual();
+        ParamFloat->SetValue(z + dz, 1, true);
     }
 }
 
 void UHoudiniBlueprintLibrary::HAssetSetPos(AHoudiniAssetActor* HoudiniAssetActor, float x, float y, float z)
 {
     HOUDINI_LOG_MESSAGE(TEXT("HAssetChangePos Enter"));
-    if (!FHoudiniEngineUtils::IsInitialized())
-    {
-        HOUDINI_LOG_MESSAGE(TEXT("Engine is not initializesd."));
-        return;
-    }
-
-    UHoudiniAssetComponent* HoudiniAssetComponent = HoudiniAssetActor->GetHoudiniAssetComponent();
-    auto parm = HoudiniAssetComponent->FindParameter("extr_pos");
+    auto parm = GetHParm(HoudiniAssetActor, "extr_pos");
     if (parm == nullptr) return;
 
     if (auto ParamFloat = Cast<UHoudiniAssetParameterFloat>( parm )) {
         ParamFloat->SetValue(x, 0, false);
         ParamFloat->SetValue(y, 2, false);
-        ParamFloat->SetValue(z, 1, false);
-        HoudiniAssetComponent->NotifyParameterChanged( ParamFloat );
-        HoudiniAssetComponent->StartTaskAssetCookingManual();
+        ParamFloat->SetValue(z, 1, true);
     }
 }
 
 // Others: extr_temp, extr_vel
+
+void UHoudiniBlueprintLibrary::HAssetCook(AHoudiniAssetActor* HoudiniAssetActor)
+{
+    HOUDINI_LOG_MESSAGE(TEXT("HAssetCook Enter"));
+    UHoudiniAssetComponent* HoudiniAssetComponent = HoudiniAssetActor->GetHoudiniAssetComponent();
+    // auto parm = GetHParm(HoudiniAssetActor, "simtime");
+    // if (parm == nullptr) return;
+
+    // if (auto ParamFloat = Cast<UHoudiniAssetParameterFloat>( parm )) {
+    //     float time = ParamFloat->GetParameterValue(0, -1);
+    //     HoudiniAssetComponent->NotifyParameterChanged(ParamFloat);
+    // }
+
+    HoudiniAssetComponent->StartTaskAssetCookingManual();
+}
