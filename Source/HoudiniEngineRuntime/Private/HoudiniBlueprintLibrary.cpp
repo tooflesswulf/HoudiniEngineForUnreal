@@ -10,6 +10,7 @@ UHoudiniAssetParameter* GetHParm(AHoudiniAssetActor* HoudiniAssetActor, const FS
         HOUDINI_LOG_MESSAGE(TEXT("Engine is not initializesd."));
         return nullptr;
     }
+    if (!HoudiniAssetActor) return nullptr;
 
     UHoudiniAssetComponent* HAC = HoudiniAssetActor->GetHoudiniAssetComponent();
     if (!HAC) return nullptr;
@@ -43,9 +44,20 @@ void UHoudiniBlueprintLibrary::HAssetAdvanceFrame(AHoudiniAssetActor* HoudiniAss
 
     if (auto ParamInt = Cast<UHoudiniAssetParameterInt>( parm )) {
         int frame = ParamInt->GetParameterValue(0, -1);
-        HOUDINI_LOG_MESSAGE(TEXT("Sim frame number %d."), frame);
+        HOUDINI_LOG_MESSAGE(TEXT("Sim frame number %d -> %d."), frame, frame + 1);
 
         ParamInt->SetValue(frame + 1, 0, true);
+    }
+}
+
+void UHoudiniBlueprintLibrary::HAssetSetFrame(AHoudiniAssetActor* HoudiniAssetActor, int frame)
+{
+    HOUDINI_LOG_MESSAGE(TEXT("HAssetSetFrame Enter"));
+    auto parm = GetHParm(HoudiniAssetActor, "frame");
+    if (parm == nullptr) return;
+
+    if (auto ParamInt = Cast<UHoudiniAssetParameterInt>( parm )) {
+        ParamInt->SetValue(frame, 0, true);
     }
 }
 
@@ -107,7 +119,7 @@ void UHoudiniBlueprintLibrary::HAssetChangePos(AHoudiniAssetActor* HoudiniAssetA
 
 void UHoudiniBlueprintLibrary::HAssetSetPos(AHoudiniAssetActor* HoudiniAssetActor, float x, float y, float z)
 {
-    HOUDINI_LOG_MESSAGE(TEXT("HAssetChangePos Enter"));
+    HOUDINI_LOG_MESSAGE(TEXT("HAssetSetPos Enter"));
     auto parm = GetHParm(HoudiniAssetActor, "extr_pos");
     if (parm == nullptr) return;
 
@@ -116,6 +128,29 @@ void UHoudiniBlueprintLibrary::HAssetSetPos(AHoudiniAssetActor* HoudiniAssetActo
         ParamFloat->SetValue(y, 2, false);
         ParamFloat->SetValue(z, 1, true);
     }
+}
+
+void UHoudiniBlueprintLibrary::HAssetSetRot(AHoudiniAssetActor* HoudiniAssetActor, float rx, float ry, float rz)
+{
+    HOUDINI_LOG_MESSAGE(TEXT("HAssetSetRot Enter"));
+    auto parm = GetHParm(HoudiniAssetActor, "extr_rot");
+    if (parm == nullptr) return;
+
+    if (auto ParamFloat = Cast<UHoudiniAssetParameterFloat>( parm )) {
+        ParamFloat->SetValue(rx, 0, false);
+        ParamFloat->SetValue(ry, 2, false);
+        ParamFloat->SetValue(rz, 1, true);
+    }
+}
+
+void UHoudiniBlueprintLibrary::HAssetSetTransform(AHoudiniAssetActor* HoudiniAssetActor, const FTransform& trans)
+{
+    if (!HoudiniAssetActor) return;
+    const FVector& loc = trans.GetLocation();
+    const FVector& dir = trans.GetRotation().Euler();
+
+    HAssetSetPos(HoudiniAssetActor, loc.X, loc.Y, loc.Z);
+    HAssetSetRot(HoudiniAssetActor, dir.X, dir.Y, dir.Z);
 }
 
 // Others: extr_temp, extr_vel
