@@ -99,6 +99,23 @@ float UHoudiniBlueprintLibrary::HAssetGetTime(AHoudiniAssetActor* HoudiniAssetAc
     return -1;
 }
 
+FVector HAssetGetPos(AHoudiniAssetActor* HoudiniAssetActor)
+{
+    FVector ret;
+
+    auto parm = GetHParm(HoudiniAssetActor, "extr_pos");
+    if (parm == nullptr) return;
+
+    if (auto ParamFloat = Cast<UHoudiniAssetParameterFloat>( parm )) {
+        // Houdini y & z are flipped from UE4 y & z
+        ret.X = ParamFloat->GetParameterValue(0, 0);
+        ret.Y = ParamFloat->GetParameterValue(2, 0);
+        ret.Z = ParamFloat->GetParameterValue(1, 0);
+    }
+    return ret;
+}
+
+
 void UHoudiniBlueprintLibrary::HAssetChangePos(AHoudiniAssetActor* HoudiniAssetActor, float dx, float dy, float dz)
 {
     HOUDINI_LOG_MESSAGE(TEXT("HAssetChangePos Enter"));
