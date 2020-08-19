@@ -32,7 +32,7 @@ class HOUDINIENGINERUNTIME_API UHoudiniBlueprintLibrary : public UBlueprintFunct
 	static float HAssetGetTime(AHoudiniAssetActor* HoudiniAssetActor);
 
 	UFUNCTION(BlueprintCallable, Category="Houdini Functions")
-	static FVector HAssetGetPos(AHoudiniAssetActor* HoudiniAssetActor);
+	static void HAssetGetPos(AHoudiniAssetActor* HoudiniAssetActor, FVector& ret);
 	UFUNCTION(BlueprintCallable, Category="Houdini Functions")
 	static void HAssetChangePos(AHoudiniAssetActor* HoudiniAssetActor, float dx=0, float dy=0, float dz=0);
 	UFUNCTION(BlueprintCallable, Category="Houdini Functions")

@@ -99,10 +99,8 @@ float UHoudiniBlueprintLibrary::HAssetGetTime(AHoudiniAssetActor* HoudiniAssetAc
     return -1;
 }
 
-FVector HAssetGetPos(AHoudiniAssetActor* HoudiniAssetActor)
+void UHoudiniBlueprintLibrary::HAssetGetPos(AHoudiniAssetActor* HoudiniAssetActor, FVector& ret)
 {
-    FVector ret;
-
     auto parm = GetHParm(HoudiniAssetActor, "extr_pos");
     if (parm == nullptr) return;
 
@@ -112,7 +110,6 @@ FVector HAssetGetPos(AHoudiniAssetActor* HoudiniAssetActor)
         ret.Y = ParamFloat->GetParameterValue(2, 0);
         ret.Z = ParamFloat->GetParameterValue(1, 0);
     }
-    return ret;
 }
 
 
