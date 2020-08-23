@@ -2042,7 +2042,13 @@ UHoudiniAssetComponent::TickHoudiniComponent()
     }
 
     if ( bStopTicking )
+    {
         StopHoudiniTicking();
+
+        // Call event dispatcher here EVENTDISPATCHHERE
+        auto* HoudiniAssetActor = GetHoudiniAssetActorOwner();
+        HoudiniAssetActor->EventCookFinished.Broadcast(HoudiniAssetActor);
+    }
 }
 
 void

@@ -45,6 +45,12 @@ class HOUDINIENGINERUNTIME_API AHoudiniAssetActor : public AActor
         meta = ( ExposeFunctionCategories = "Mesh,Rendering,Physics,Components|HoudiniAsset" ) )
     UHoudiniAssetComponent * HoudiniAssetComponent;
 
+    public: 
+    DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam( FHoudiniCookFinished, AHoudiniAssetActor*, HoudiniAssetActor );
+	UPROPERTY(BlueprintAssignable, Category="Houdini Functions")
+	FHoudiniCookFinished EventCookFinished;
+	
+
     public:
 
         /** Return true if this actor is used for preview. **/
