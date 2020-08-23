@@ -610,7 +610,7 @@ FHoudiniEngine::InitializeHAPISession()
         TCHAR_TO_UTF8( *HoudiniRuntimeSettings->DsoSearchPath),
         TCHAR_TO_UTF8( *HoudiniRuntimeSettings->ImageDsoSearchPath), 
         TCHAR_TO_UTF8( *HoudiniRuntimeSettings->AudioDsoSearchPath) );
-
+    
     if ( Result != HAPI_RESULT_SUCCESS )
     {
         HOUDINI_LOG_MESSAGE(
@@ -619,6 +619,21 @@ FHoudiniEngine::InitializeHAPISession()
 
         return false;
     }
+
+    TimelineOptions.fps = HoudiniRuntimeSettings->HoudiniFPS;
+    Result = FHoudiniApi::SetTimelineOptions(&Session, &TimelineOptions);
+    if ( Result != HAPI_RESULT_SUCCESS )
+    {
+        HOUDINI_LOG_MESSAGE(
+            TEXT("Starting up the Houdini Engine API module failed: %s"),
+            *FHoudiniEngineUtils::GetErrorDescription( Result ) );
+
+        return false;
+    }
+    else {
+        HOUDINI_LOG_MESSAGE(TEXT("Successfully set framerate: %f!"), TimelineOptions.fps);
+    }
+
 
     HOUDINI_LOG_MESSAGE( TEXT( "Successfully intialized the Houdini Engine API module." ) );
     FHoudiniApi::SetServerEnvString(&Session, HAPI_ENV_CLIENT_NAME, HAPI_UNREAL_CLIENT_NAME );

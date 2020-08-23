@@ -246,6 +246,10 @@ class HOUDINIENGINERUNTIME_API UHoudiniRuntimeSettings : public UObject
         UPROPERTY(GlobalConfig, EditAnywhere, Category = Cooking)
         FText TemporaryCookFolder;
 
+        // Houdini framerate for frameskip reasons.
+        UPROPERTY(GlobalConfig, EditAnywhere, Category = Cooking)
+        float HoudiniFPS;
+
     /** Parameter options. **/
     public:
 

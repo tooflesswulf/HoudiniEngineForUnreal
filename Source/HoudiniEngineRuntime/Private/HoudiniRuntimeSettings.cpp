@@ -61,6 +61,8 @@ UHoudiniRuntimeSettings::UHoudiniRuntimeSettings( const FObjectInitializer & Obj
 
     TemporaryCookFolder = LOCTEXT("Temp", "/Game/HoudiniEngine/Temp");
 
+    HoudiniFPS = 30.0;
+
     /** Parameter options. **/
     bTreatRampParametersAsMultiparms = false;
 

@@ -156,6 +156,9 @@ class HOUDINIENGINERUNTIME_API FHoudiniEngine : public IHoudiniEngine
         /** Global cooking flag, used to pause HEngine while using the editor **/
         bool EnableCookingGlobal;
 
+        /** Timeline options. (for fps) **/
+        HAPI_TimelineOptions TimelineOptions;
+
         // Indicates that the first attempt to create a session has been done
         // This is to delay the first "automatic" session creation for the first cook 
         // or instantiation rather than when the module started.
